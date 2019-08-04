@@ -91,5 +91,53 @@ function lowInventory() {
 }
 
 function addInventory() {
-
+    inquirer.prompt([
+        {
+            name: "product", 
+            type: "input", 
+            message: "Please input the name of the Product you would like to add."
+        }, 
+        {
+            name: "department", 
+            type: "input", 
+            message: "In which department will this product be stored?"
+        }, 
+        {
+            name: "price", 
+            type: "input",
+            message: "What is the cost of this product?", 
+            validate: function(value){
+                if (isNaN(value) === false) {
+                    return true;
+                }
+                return false;
+            }
+        }, 
+        {
+            name: "quantity", 
+            type: "input", 
+            message: "How much of this product would you like to add?", 
+            validate: function(value){
+                if (isNaN(value) === false) {
+                    return true;
+                }
+                return false;
+            }
+        }
+    ]).then(function(answer) {
+        connection.query("INSERT INTO products SET ?", 
+        {
+            product_name: answer.product, 
+            department: answer.department, 
+            price: answer.price || 0,
+            stock_quantity: answer.quantity || 0
+        }, 
+        function(err) {
+            if (err) throw err;
+            console.log("");
+            console.log("Your " + answer.product + " has been added to Bamazon's inventory list.");
+            console.log("");
+            afterConnection();
+        })
+    })
 }
