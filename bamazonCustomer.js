@@ -1,12 +1,13 @@
 var mysql = require('mysql');
 var inquirer = require("inquirer");
 var Table = require("cli-table");
+var total = 0;
 
 var connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
     user: "root",
-    password: "",
+    password: "PileatedWoodpecker",
     database: "bamazonDB"
 });
 
@@ -32,7 +33,6 @@ function afterConnection() {
             )
         }
         console.log(table.toString());
-        connection.end();
         startSale();
     });
 }
@@ -40,7 +40,7 @@ function afterConnection() {
 function startSale() {
     inquirer.prompt([
         {
-            name: "purchase",
+            name: "id",
             type: "input",
             message: "What is the ID of the item you would like to purchase?",
             validate: function (value) {
@@ -62,8 +62,42 @@ function startSale() {
             }
         }
     ]).then (function(answer) {
-        // console.log("Answer for product ID: " + answer.purchase);
+        // console.log("Answer for product ID: " + answer.id);
         // console.log("Answer for amount: " + answer.amount);
+        connection.query("SELECT * FROM products WHERE ?", { id: answer.id }, function (err, res) { 
+            if (err) throw err;
+            // console.log(res)
+
+            if (res[0].stock_quantity >= answer.amount) {
+                total = total + (answer.amount * res[0].price);
+                console.log("Your Total: $" + total);
+                console.log("You added " + answer.amount + " " + res[0].product_name + " in your cart!");
+                inquirer.prompt(
+                    {
+                        name: "nextStep", 
+                        type: "list", 
+                        message: "Would you like to continue shopping?",
+                        choices: ["YES", "NO"]
+                    }
+                ).then(function(answer) {
+                    if (answer.nextStep === "YES"){
+                        // connection.end();
+                        startSale();
+                    }
+                    else if (answer.nextStep === "NO"){
+                        connection.end();
+                        console.log("Thank you for shopping with us today.")
+                        console.log("Your total is $" + total)
+                    }
+                })
+            }
+            else {
+                console.log("Insufficient Quantity! Please select another Item");
+                connection.end();
+                startSale();
+            }
+            
+        })
 
     })
 }
