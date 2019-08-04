@@ -6,7 +6,7 @@ var connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
     user: "root",
-    password: "PileatedWoodpecker",
+    password: "",
     database: "bamazonDB"
 });
 
@@ -91,5 +91,5 @@ function lowInventory() {
 }
 
 function addInventory() {
-    
+
 }
