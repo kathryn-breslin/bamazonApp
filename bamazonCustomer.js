@@ -7,7 +7,7 @@ var connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
     user: "root",
-    password: "PileatedWoodpecker",
+    password: "",
     database: "bamazonDB"
 });
 
@@ -72,6 +72,19 @@ function startSale() {
                 total = total + (answer.amount * res[0].price);
                 console.log("Your Total: $" + total);
                 console.log("You added " + answer.amount + " " + res[0].product_name + " in your cart!");
+
+                var stockQuantity = res[0].stock_quantity - answer.amount;
+                // console.log("Stock Quantity: " + stockQuantity);
+                connection.query("UPDATE products SET ? WHERE ?", 
+                    [
+                        {
+                            stock_quantity: stockQuantity
+                        }, 
+                        {
+                            id: answer.id
+                        }
+                    ]
+                )
                 inquirer.prompt(
                     {
                         name: "nextStep", 
