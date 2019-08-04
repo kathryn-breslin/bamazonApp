@@ -135,7 +135,7 @@ function addInventory() {
                             {
                                 product_name: chosenProduct
                             }
-                        ], 
+                        ],
                         function (error) {
                             if (error) throw error;
                             console.log("");
@@ -155,56 +155,58 @@ function addInventory() {
 }
 
 function addProduct() {
-    inquirer.prompt([
-        {
-            name: "product",
-            type: "input",
-            message: "Please input the name of the Product you would like to add."
-        },
-        {
-            name: "department",
-            type: "input",
-            message: "In which department will this product be stored?"
-        },
-        {
-            name: "price",
-            type: "input",
-            message: "What is the cost of this product?",
-            validate: function (value) {
-                if (isNaN(value) === false) {
-                    return true;
-                }
-                return false;
-            }
-        },
-        {
-            name: "quantity",
-            type: "input",
-            message: "How much of this product would you like to add?",
-            validate: function (value) {
-                if (isNaN(value) === false) {
-                    return true;
-                }
-                return false;
-            }
-        }
-    ]).then(function (answer) {
-        connection.query("INSERT INTO products SET ?",
+
+        inquirer.prompt([
             {
-                product_name: answer.product,
-                department: answer.department,
-                price: answer.price || 0,
-                stock_quantity: answer.quantity || 0
+                name: "product",
+                type: "input",
+                message: "Please input the name of the Product you would like to add."
             },
-            function (err) {
-                if (err) throw err;
-                console.log("");
-                console.log("Your " + answer.product + " has been added to Bamazon's inventory list.");
-                console.log("");
-                console.log("");
-                console.log("What would you like to do next?");
-                console.log("");
-                afterConnection();
-            })
-    })
+            {
+                name: "department",
+                type: "input",
+                message: "In which department will this product be stored?"
+            },
+            {
+                name: "price",
+                type: "input",
+                message: "What is the cost of this product?",
+                validate: function (value) {
+                    if (isNaN(value) === false) {
+                        return true;
+                    }
+                    return false;
+                }
+            },
+            {
+                name: "quantity",
+                type: "input",
+                message: "How much of this product would you like to add?",
+                validate: function (value) {
+                    if (isNaN(value) === false) {
+                        return true;
+                    }
+                    return false;
+                }
+            }
+        ]).then(function (answer) {
+            connection.query("INSERT INTO products SET ?",
+                {
+                    product_name: answer.product,
+                    department: answer.department,
+                    price: answer.price || 0,
+                    stock_quantity: answer.quantity || 0
+                },
+                function (err) {
+                    if (err) throw err;
+                    console.log("");
+                    console.log("Your " + answer.product + " has been added to Bamazon's inventory list.");
+                    console.log("Bamazon now has " + answer.quantity + " units of the " + answer.product + " in our database.")
+                    console.log("");
+                    console.log("");
+                    console.log("What would you like to do next?");
+                    console.log("");
+                    afterConnection();
+                })
+        })
 }
