@@ -6,7 +6,7 @@ var connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
     user: "root",
-    password: "",
+    password: "PileatedWoodpecker",
     database: "bamazonDB"
 });
 
@@ -39,7 +39,7 @@ function afterConnection() {
                 addInventory();
             }
             else if (answer.options === "Add New Product") {
-                console.log("Add to Inventory")
+                addProduct();
             }
             else {
                 console.log("Exiting the system.")
@@ -63,6 +63,9 @@ function viewProducts() {
         console.log("");
 
     })
+    console.log("");
+    console.log("What would you like to do next?");
+    console.log("");
     afterConnection();
 }
 
@@ -87,57 +90,121 @@ function lowInventory() {
             console.log("");
         }
     })
+    console.log("");
+    console.log("What would you like to do next?");
+    console.log("");
     afterConnection();
 }
 
 function addInventory() {
+    connection.query("SELECT * FROM products", function (err, res) {
+        if (err) throw err;
+
+        inquirer.prompt([
+            {
+                name: "productChoice",
+                type: "rawlist",
+                choices: function () {
+                    var choices = [];
+                    for (var i = 0; i < res.length; i++) {
+                        choices.push(res[i].product_name)
+                    }
+                    return choices;
+                },
+                message: "What product would you like to update?"
+            },
+            {
+                name: "inventoryAmount",
+                type: "input",
+                message: "How many units would you like to add to this product's inventory?"
+            }
+        ]).then(function (answer) {
+            var chosenProduct;
+
+            // console.log(answer.inventoryAmount)
+            for (var i = 0; i < res.length; i++) {
+                if (res[i].product_name === answer.productChoice) {
+                    chosenProduct = res[i].product_name;
+
+                    var newTotal = res[i].stock_quantity + parseInt(answer.inventoryAmount);
+                    connection.query("UPDATE products SET ? WHERE ?",
+                        [
+                            {
+                                stock_quantity: newTotal
+                            },
+                            {
+                                product_name: chosenProduct
+                            }
+                        ], 
+                        function (error) {
+                            if (error) throw error;
+                            console.log("");
+                            console.log("You have added " + answer.inventoryAmount + " units to " + chosenProduct + ".");
+                            console.log("The new total inventory for " + chosenProduct + " is " + newTotal + ".");
+                            console.log("");
+                            console.log("");
+                            console.log("What would you like to do next?");
+                            console.log("");
+                            afterConnection();
+                        }
+                    )
+                }
+            }
+        })
+    })
+}
+
+function addProduct() {
     inquirer.prompt([
         {
-            name: "product", 
-            type: "input", 
-            message: "Please input the name of the Product you would like to add."
-        }, 
-        {
-            name: "department", 
-            type: "input", 
-            message: "In which department will this product be stored?"
-        }, 
-        {
-            name: "price", 
+            name: "product",
             type: "input",
-            message: "What is the cost of this product?", 
-            validate: function(value){
+            message: "Please input the name of the Product you would like to add."
+        },
+        {
+            name: "department",
+            type: "input",
+            message: "In which department will this product be stored?"
+        },
+        {
+            name: "price",
+            type: "input",
+            message: "What is the cost of this product?",
+            validate: function (value) {
                 if (isNaN(value) === false) {
                     return true;
                 }
                 return false;
             }
-        }, 
+        },
         {
-            name: "quantity", 
-            type: "input", 
-            message: "How much of this product would you like to add?", 
-            validate: function(value){
+            name: "quantity",
+            type: "input",
+            message: "How much of this product would you like to add?",
+            validate: function (value) {
                 if (isNaN(value) === false) {
                     return true;
                 }
                 return false;
             }
         }
-    ]).then(function(answer) {
-        connection.query("INSERT INTO products SET ?", 
-        {
-            product_name: answer.product, 
-            department: answer.department, 
-            price: answer.price || 0,
-            stock_quantity: answer.quantity || 0
-        }, 
-        function(err) {
-            if (err) throw err;
-            console.log("");
-            console.log("Your " + answer.product + " has been added to Bamazon's inventory list.");
-            console.log("");
-            afterConnection();
-        })
+    ]).then(function (answer) {
+        connection.query("INSERT INTO products SET ?",
+            {
+                product_name: answer.product,
+                department: answer.department,
+                price: answer.price || 0,
+                stock_quantity: answer.quantity || 0
+            },
+            function (err) {
+                if (err) throw err;
+                console.log("");
+                console.log("Your " + answer.product + " has been added to Bamazon's inventory list.");
+                console.log("");
+                console.log("");
+                console.log("What would you like to do next?");
+                console.log("");
+                afterConnection();
+            })
     })
 }
