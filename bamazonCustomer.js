@@ -74,16 +74,12 @@ function startSale() {
                 console.log("You added " + answer.amount + " " + res[0].product_name + " in your cart!");
 
                 var stockQuantity = res[0].stock_quantity - answer.amount;
+                var productSales = res[0].price * answer.amount;
+                // console.log("Total product sales: " + productSales)
                 // console.log("Stock Quantity: " + stockQuantity);
-                connection.query("UPDATE products SET ? WHERE ?", 
-                    [
-                        {
-                            stock_quantity: stockQuantity
-                        }, 
-                        {
-                            id: answer.id
-                        }
-                    ]
+                connection.query("UPDATE products SET stock_quantity = ?, product_sales = ? WHERE id = ?", 
+                    [stockQuantity, productSales, answer.id], function (err, res) { 
+                    }
                 )
                 inquirer.prompt(
                     {
