@@ -42,6 +42,10 @@ var table = new Table({
 function showSales() {
     connection.query("SELECT departments.department_id, departments.department, departments.over_head_costs, SUM(products.product_sales) as product_sales, SUM(products.product_sales) - departments.over_head_costs as total_profit FROM products INNER JOIN departments ON products.department = departments.department GROUP BY departments.department_id, departments.department, departments.over_head_costs", function(err, res) {
         if (err) throw err;
-        console.log(res);
+        // console.log(res);
+        for (var i = 0; i < res.length; i++) {
+            table.push([res[i].department_id, res[i].department, res[i].over_head_costs, res[i].product_sales, res[i].total_profit])
+        }
+        console.log(table.toString());
     });
 }
